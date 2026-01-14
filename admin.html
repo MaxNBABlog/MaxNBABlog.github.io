@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - NBA Deep Dives with Max Krupp</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+    :root {
+      --accent-gold: #c9b037;
+      --accent-gold-dark: #a68a1d;
+      --accent-gold-light: #f7e7a0;
+      --main-bg: #f9f9f9;
+      --main-font: #232323;
+      --card-bg: #fff;
+      --card-shadow: 0 8px 32px rgba(0,0,0,0.10);
+    }
+    body {
+      margin: 0;
+      font-family: 'Montserrat', Arial, sans-serif;
+      background-color: var(--main-bg);
+      color: var(--main-font);
+      min-height: 100vh;
+    }
+    header {
+      background-image: url('CeticsImage.jpg');
+      background-size: cover;
+      background-position: center;
+      color: white;
+      text-align: center;
+      padding: 100px 10px 60px 10px;
+      font-size: 2em;
+      font-weight: bold;
+      position: relative;
+    }
+    header::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1;
+    }
+    header span {
+      position: relative;
+      z-index: 2;
+    }
+    header .nav-buttons {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 3;
+      display: flex;
+      gap: 10px;
+    }
+    header .nav-buttons a {
+      text-decoration: none;
+      color: white;
+      font-size: 1em;
+      font-weight: bold;
+      border: 2px solid white;
+      padding: 8px 16px;
+      border-radius: 4px;
+      display: inline-block;
+      transition: color 0.3s, border-color 0.3s;
+    }
+    header .nav-buttons a:hover {
+      color: var(--accent-gold);
+      border-color: var(--accent-gold);
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .admin-header h1 {
+      color: var(--accent-gold);
+      margin: 0;
+    }
+    .new-post-btn {
+      padding: 15px 30px;
+      background: var(--accent-gold);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.1em;
+      font-weight: bold;
+      transition: background 0.3s;
+      box-shadow: 0 4px 12px rgba(201, 176, 55, 0.3);
+    }
+    .new-post-btn:hover {
+      background: var(--accent-gold-dark);
+      box-shadow: 0 6px 16px rgba(201, 176, 55, 0.4);
+    }
+    .admin-content {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 20px;
+    }
+    .editor-section {
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: var(--card-shadow);
+      padding: 30px;
+    }
+    .sidebar-section {
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: var(--card-shadow);
+      padding: 20px;
+    }
+    .editor-toolbar {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      padding: 10px;
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    .editor-toolbar button {
+      padding: 6px 12px;
+      font-size: 0.9em;
+      background: white;
+      color: #333;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .editor-toolbar button:hover {
+      background: #e0e0e0;
+    }
+    .editor-toolbar button.active {
+      background: var(--accent-gold);
+      color: white;
+      border-color: var(--accent-gold-dark);
+    }
+    .rich-editor {
+      min-height: 400px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: white;
+      font-family: inherit;
+      font-size: 1em;
+      line-height: 1.6;
+      overflow-y: auto;
+    }
+    .rich-editor:focus {
+      outline: 2px solid var(--accent-gold);
+      outline-offset: -2px;
+    }
+    .rich-editor:empty:before {
+      content: attr(placeholder);
+      color: #999;
+      font-style: italic;
+    }
+    select,
+    input[type="text"],
+    input[type="date"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-family: inherit;
+      font-size: 1em;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #333;
+    }
+    .post-status {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .post-status button {
+      flex: 1;
+      min-width: 120px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    .btn-draft {
+      background: #ff9800;
+      color: white;
+    }
+    .btn-draft:hover {
+      background: #f57c00;
+    }
+    .btn-publish {
+      background: #4caf50;
+      color: white;
+    }
+    .btn-publish:hover {
+      background: #45a049;
+    }
+    .post-title {
+      cursor: pointer;
+      margin-bottom: 14px;
+      color: var(--accent-gold);
+      font-weight: bold;
+      font-size: 1.1em;
+      letter-spacing: 0.5px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: color 0.3s, background 0.3s;
+      position: relative;
+    }
+    .post-title:hover {
+      background: #f5f5f5;
+    }
+    .post-title .editPostBtn,
+    .post-title .deletePostBtn {
+      position: absolute;
+      right: 0;
+      top: 2px;
+      font-size: 0.85em;
+      padding: 4px 8px;
+      margin-left: 5px;
+      background: #eee;
+      color: #333;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .post-title .editPostBtn:hover,
+    .post-title .deletePostBtn:hover {
+      background: var(--accent-gold);
+      color: #fff;
+    }
+    .post-title .deletePostBtn {
+      right: 55px;
+    }
+    .draft-badge {
+      display: inline-block;
+      background: #ff9800;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 0.75em;
+      margin-left: 8px;
+      font-weight: normal;
+    }
+    .drafts-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 2px solid #ddd;
+    }
+    .drafts-section h4 {
+      color: #ff9800;
+      margin-bottom: 10px;
+    }
+    .publishDraftBtn {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85em;
+      margin-left: 5px;
+    }
+    .publishDraftBtn:hover {
+      background: #45a049;
+    }
+    #mainImagePreview img {
+      max-width: 200px;
+      max-height: 200px;
+      margin-top: 10px;
+      border-radius: 8px;
+    }
+    .hidden {
+      display: none;
+    }
+    @media (max-width: 900px) {
+      .admin-content {
+        grid-template-columns: 1fr;
+      }
+      .editor-toolbar {
+        flex-direction: column;
+      }
+      .editor-toolbar button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav-buttons">
+      <a href="index.html">View Blog</a>
+      <a href="admin.html">Admin</a>
+    </div>
+    <span>Admin Panel - NBA Deep Dives</span>
+  </header>
+
+  <div class="container">
+    <div class="admin-header">
+      <h1>Post Editor</h1>
+      <button class="new-post-btn" id="newPostButton">+ New Post</button>
+    </div>
+
+    <div class="admin-content">
+      <div class="editor-section">
+        <div id="editorForm">
+          <h2 id="editorTitle">Create a New Post</h2>
+          <label for="postTitle">Title:</label>
+          <input type="text" id="postTitle" placeholder="Enter post title" />
+          
+          <label>Content Editor:</label>
+          <div class="editor-toolbar">
+            <button type="button" onclick="formatDoc('bold')" title="Bold"><b>B</b></button>
+            <button type="button" onclick="formatDoc('italic')" title="Italic"><i>I</i></button>
+            <button type="button" onclick="formatDoc('underline')" title="Underline"><u>U</u></button>
+            <button type="button" onclick="formatDoc('justifyLeft')" title="Align Left">⬅</button>
+            <button type="button" onclick="formatDoc('justifyCenter')" title="Align Center">⬌</button>
+            <button type="button" onclick="formatDoc('justifyRight')" title="Align Right">➡</button>
+            <button type="button" onclick="formatDoc('insertUnorderedList')" title="Bullet List">• List</button>
+            <button type="button" onclick="formatDoc('insertOrderedList')" title="Numbered List">1. List</button>
+            <button type="button" onclick="formatDoc('formatBlock', '<h2>')" title="Heading 2">H2</button>
+            <button type="button" onclick="formatDoc('formatBlock', '<h3>')" title="Heading 3">H3</button>
+            <button type="button" onclick="formatDoc('formatBlock', '<p>')" title="Paragraph">P</button>
+            <button type="button" onclick="insertLink()" title="Insert Link">🔗</button>
+            <button type="button" onclick="insertImage()" title="Insert Image">🖼</button>
+          </div>
+          <div id="richEditor" class="rich-editor" contenteditable="true" placeholder="Start writing your post here..."></div>
+          
+          <label for="postImage">Main Image (optional):</label>
+          <input type="file" id="postImage" accept="image/*" />
+          <div id="mainImagePreview"></div>
+          <label for="imagePosition">Image Position:</label>
+          <select id="imagePosition">
+            <option value="top">Top (default)</option>
+            <option value="left">Left of text</option>
+            <option value="right">Right of text</option>
+            <option value="none">Do not display</option>
+          </select>
+          <label for="imageSize">Image Size:</label>
+          <select id="imageSize">
+            <option value="small">Small</option>
+            <option value="medium" selected>Medium</option>
+            <option value="large">Large</option>
+          </select>
+          <label for="imageShape">Image Shape:</label>
+          <select id="imageShape">
+            <option value="natural">Natural</option>
+            <option value="circle">Circle</option>
+            <option value="circle-shadow">Circle with Shadow</option>
+            <option value="rounded">Rounded Corners</option>
+          </select>
+          <label for="postDate">Date:</label>
+          <input type="date" id="postDate" />
+          
+          <div class="post-status">
+            <button id="saveDraftButton" class="btn-draft">Save as Draft</button>
+            <button id="publishPostButton" class="btn-publish">Publish Post</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Published Posts</h3>
+        <div id="postList"></div>
+        
+        <div class="drafts-section">
+          <h4>Drafts</h4>
+          <div id="draftList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Use localStorage to persist posts and drafts
+    const STORAGE_KEY = 'nba_blog_posts';
+    const DRAFTS_KEY = 'nba_blog_drafts';
+
+    function savePosts() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+    }
+
+    function saveDrafts() {
+      localStorage.setItem(DRAFTS_KEY, JSON.stringify(drafts));
+    }
+
+    function loadPosts() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {
+          return [];
+        }
+      }
+      return [];
+    }
+
+    function loadDrafts() {
+      const saved = localStorage.getItem(DRAFTS_KEY);
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {
+          return [];
+        }
+      }
+      return [];
+    }
+
+    let posts = loadPosts();
+    let drafts = loadDrafts();
+    let editingPostIndex = null;
+    let editingDraftIndex = null;
+
+    // Rich Text Editor Functions
+    function formatDoc(cmd, value = null) {
+      document.execCommand(cmd, false, value);
+      document.getElementById('richEditor').focus();
+    }
+
+    function insertLink() {
+      const url = prompt('Enter URL:');
+      if (url) {
+        document.execCommand('createLink', false, url);
+      }
+    }
+
+    function insertImage() {
+      const url = prompt('Enter image URL:');
+      if (url) {
+        document.execCommand('insertImage', false, url);
+      }
+    }
+
+    const postList = document.getElementById('postList');
+    const draftList = document.getElementById('draftList');
+    const newPostButton = document.getElementById('newPostButton');
+    const saveDraftButton = document.getElementById('saveDraftButton');
+    const publishPostButton = document.getElementById('publishPostButton');
+    const postImageInput = document.getElementById('postImage');
+    const richEditor = document.getElementById('richEditor');
+    const mainImagePreview = document.getElementById('mainImagePreview');
+    const editorTitle = document.getElementById('editorTitle');
+
+    // Main image preview
+    postImageInput.addEventListener('change', function() {
+      if (this.files && this.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          mainImagePreview.innerHTML = `<img src="${e.target.result}" />`;
+        };
+        reader.readAsDataURL(this.files[0]);
+      } else {
+        mainImagePreview.innerHTML = '';
+      }
+    });
+
+    function clearEditor() {
+      document.getElementById('postTitle').value = '';
+      richEditor.innerHTML = '';
+      postImageInput.value = '';
+      mainImagePreview.innerHTML = '';
+      document.getElementById('imagePosition').value = 'top';
+      document.getElementById('imageSize').value = 'medium';
+      document.getElementById('imageShape').value = 'natural';
+      document.getElementById('postDate').valueAsDate = new Date();
+      editingPostIndex = null;
+      editingDraftIndex = null;
+      editorTitle.textContent = 'Create a New Post';
+    }
+
+    function savePostData(isDraft = false) {
+      const title = document.getElementById('postTitle').value.trim();
+      const content = richEditor.innerHTML.trim();
+      const date = document.getElementById('postDate').value || new Date().toISOString().split('T')[0];
+      const imagePosition = document.getElementById('imagePosition').value;
+      const imageSize = document.getElementById('imageSize').value;
+      const imageShape = document.getElementById('imageShape').value;
+
+      if (!title || !content) {
+        alert('Please enter a title and content.');
+        return false;
+      }
+
+      let imageData = null;
+      if (postImageInput.files && postImageInput.files[0]) {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            imageData = e.target.result;
+            resolve({ title, content, date, image: imageData, imagePosition, imageSize, imageShape, isDraft });
+          };
+          reader.readAsDataURL(postImageInput.files[0]);
+        });
+      } else {
+        // Check if there's an existing image preview
+        const existingImg = mainImagePreview.querySelector('img');
+        if (existingImg) {
+          imageData = existingImg.src;
+        }
+        return Promise.resolve({ title, content, date, image: imageData, imagePosition, imageSize, imageShape, isDraft });
+      }
+    }
+
+    newPostButton.addEventListener('click', () => {
+      clearEditor();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    saveDraftButton.addEventListener('click', async () => {
+      const postData = await savePostData(true);
+      if (!postData) return;
+
+      if (editingDraftIndex !== null) {
+        drafts[editingDraftIndex] = { ...postData, comments: drafts[editingDraftIndex].comments || [] };
+      } else {
+        drafts.push({ ...postData, comments: [] });
+      }
+      saveDrafts();
+      displayDrafts();
+      displayPosts();
+      clearEditor();
+      alert('Draft saved!');
+    });
+
+    publishPostButton.addEventListener('click', async () => {
+      const postData = await savePostData(false);
+      if (!postData) return;
+
+      if (editingPostIndex !== null) {
+        posts[editingPostIndex] = { ...postData, comments: posts[editingPostIndex].comments || [] };
+      } else if (editingDraftIndex !== null) {
+        // Publishing from draft
+        drafts.splice(editingDraftIndex, 1);
+        saveDrafts();
+        posts.push({ ...postData, comments: [] });
+      } else {
+        posts.push({ ...postData, comments: [] });
+      }
+      savePosts();
+      displayPosts();
+      displayDrafts();
+      clearEditor();
+      alert('Post published!');
+    });
+
+    function displayPosts() {
+      let filteredPosts = posts.slice();
+      filteredPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      postList.innerHTML = '';
+      if (filteredPosts.length === 0) {
+        postList.innerHTML = '<p style="color:#888;font-size:0.9em;">No published posts yet.</p>';
+        return;
+      }
+      
+      filteredPosts.forEach((post, index) => {
+        const div = document.createElement('div');
+        div.className = 'post-title';
+        div.innerHTML = `
+          <span style="cursor:pointer;">${post.title}</span>
+          <button class="editPostBtn">Edit</button>
+          <button class="deletePostBtn">Delete</button>
+        `;
+        div.querySelector('span').onclick = () => editPost(index);
+        div.querySelector('.editPostBtn').onclick = (e) => {
+          e.stopPropagation();
+          editPost(index);
+        };
+        div.querySelector('.deletePostBtn').onclick = (e) => {
+          e.stopPropagation();
+          if (confirm('Are you sure you want to delete this post?')) {
+            posts.splice(index, 1);
+            savePosts();
+            displayPosts();
+          }
+        };
+        postList.appendChild(div);
+      });
+    }
+
+    function displayDrafts() {
+      draftList.innerHTML = '';
+      if (drafts.length === 0) {
+        draftList.innerHTML = '<p style="color:#888;font-size:0.9em;">No drafts saved.</p>';
+        return;
+      }
+      
+      drafts.forEach((draft, index) => {
+        const div = document.createElement('div');
+        div.className = 'post-title';
+        div.innerHTML = `
+          <span style="cursor:pointer;">${draft.title} <span class="draft-badge">DRAFT</span></span>
+          <button class="editPostBtn">Edit</button>
+          <button class="deletePostBtn">Delete</button>
+          <button class="publishDraftBtn">Publish</button>
+        `;
+        div.querySelector('span').onclick = () => editDraft(index);
+        div.querySelector('.editPostBtn').onclick = (e) => {
+          e.stopPropagation();
+          editDraft(index);
+        };
+        div.querySelector('.deletePostBtn').onclick = (e) => {
+          e.stopPropagation();
+          if (confirm('Are you sure you want to delete this draft?')) {
+            drafts.splice(index, 1);
+            saveDrafts();
+            displayDrafts();
+          }
+        };
+        div.querySelector('.publishDraftBtn').onclick = (e) => {
+          e.stopPropagation();
+          publishDraft(index);
+        };
+        draftList.appendChild(div);
+      });
+    }
+
+    function publishDraft(index) {
+      const draft = drafts[index];
+      posts.push({
+        ...draft,
+        comments: []
+      });
+      drafts.splice(index, 1);
+      savePosts();
+      saveDrafts();
+      displayPosts();
+      displayDrafts();
+      clearEditor();
+      alert('Draft published!');
+    }
+
+    function editDraft(index) {
+      editingDraftIndex = index;
+      editingPostIndex = null;
+      const draft = drafts[index];
+      document.getElementById('postTitle').value = draft.title;
+      richEditor.innerHTML = draft.content || '';
+      document.getElementById('postDate').value = draft.date || '';
+      document.getElementById('imagePosition').value = draft.imagePosition || 'top';
+      document.getElementById('imageSize').value = draft.imageSize || 'medium';
+      document.getElementById('imageShape').value = draft.imageShape || 'natural';
+      editorTitle.textContent = 'Edit Draft';
+      
+      if (draft.image) {
+        mainImagePreview.innerHTML = `<img src="${draft.image}" />`;
+      } else {
+        mainImagePreview.innerHTML = '';
+      }
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function editPost(index) {
+      editingPostIndex = index;
+      editingDraftIndex = null;
+      const post = posts[index];
+      document.getElementById('postTitle').value = post.title;
+      richEditor.innerHTML = post.content || '';
+      document.getElementById('postDate').value = post.date || '';
+      document.getElementById('imagePosition').value = post.imagePosition || 'top';
+      document.getElementById('imageSize').value = post.imageSize || 'medium';
+      document.getElementById('imageShape').value = post.imageShape || 'natural';
+      editorTitle.textContent = 'Edit Post';
+      
+      if (post.image) {
+        mainImagePreview.innerHTML = `<img src="${post.image}" />`;
+      } else {
+        mainImagePreview.innerHTML = '';
+      }
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Set default date to today
+    document.getElementById('postDate').valueAsDate = new Date();
+
+    // Initial display
+    displayPosts();
+    displayDrafts();
+  </script>
+</body>
+</html>
